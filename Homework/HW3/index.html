@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <!-- install d3 -->
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+        <h3> Kendall Hoffman (kah342) </h3>
+
+        <p id="problem1">
+            <b>Problem 1:</b>
+            <br>
+            
+            <svg id="p1" height="400" width="400" style="border: black 1px solid"></svg>
+
+            <script id="p1">
+                let svg1 = d3.select("svg#p1");
+                let width = svg1.attr("width");
+                let height = svg1.attr("height");
+                
+                svg1.append("circle")
+                    .attr("cx", 200)
+                    .attr("cy", 200)
+                    .attr("r", 5)
+                    .style("fill", "lightgreen");
+
+                svg1.append("text")
+                    .text("INFO-3300")
+                    .attr("x", width/2)
+                    .attr("y", height/2)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "central")
+                    .style("font-family", "Courier")
+                    .style("font-size", "20px")
+                    .style("fill", "darkblue");
+
+                svg1.append("rect")
+                    .attr("x", 250)
+                    .attr("y", 75)
+                    .attr('width', 100)
+                    .attr('height', 60)
+                    .attr('stroke', 'purple')
+                    .attr('fill', 'lavender');
+
+                svg1.append("rect")
+                    .attr("x", 30)
+                    .attr("y", 150)
+                    .attr('width', 75)
+                    .attr('height', 70)
+                    .attr('stroke', 'blue')
+                    .attr('fill', 'lightblue');
+
+                svg1.append("rect")
+                    .attr("x", 200)
+                    .attr("y", 270)
+                    .attr('width', 40)
+                    .attr('height', 80)
+                    .attr('stroke', 'red')
+                    .attr('fill', 'lightsalmon');
+            </script>
+        </p>
+
+        <p id="problem2">
+            <b>Problem 2:</b>
+            <br>
+            <svg id="p2" height="360" width="360" style="border: black 1px solid"></svg>
+            
+            <script>
+            let svg2 = d3.select("svg#p2");
+            let width2 = svg2.attr("width");
+            let height2 = svg2.attr("height");
+
+            let data = [{ "x": 1.0, "y": 9.0 },
+                        { "x": 1.5, "y": 6.0 },
+                        { "x": 2.5, "y": 4.0 },
+                        { "x": 4.0, "y": 2.0 },
+                        { "x": 5.0, "y": 1.6 },
+                        { "x": 6.0, "y": 2.4 },
+                        { "x": 7.0, "y": 3.0 },
+                        { "x": 8.0, "y": 3.4 },
+                        { "x": 9.0, "y": 3.6 }]
+
+            let xScale = d3.scaleLinear()
+                .domain([0,10])
+                .range([20, width2-20]);
+            
+            let yScale = d3.scaleLinear()
+                .domain([10,0])
+                .range([20,height2-20]);
+
+            // vertical lines
+            for(i = 0; i<= 10; i++){
+                for(j=0; j<= 10; j++){
+                    svg2.append("line")
+                        .attr("x1", xScale(i))
+                        .attr("y1", yScale(j))
+                        .attr("x2", xScale(i))
+                        .attr("y2", height2-20)
+                        .style("stroke", "lightgrey")
+                        .style("stroke-width", 1)
+                }
+            }
+
+            //horizontal lines
+             for (j = 0; j <= 10; j++) {
+                for (i = 0; i <= 10; i++) {
+                    svg2.append("line")
+                        .attr("x1", xScale(i))
+                        .attr("y1", yScale(j))
+                        .attr("x2", width2-20)
+                        .attr("y2", yScale(j))
+                        .style("stroke", "lightgrey")
+                        .style("stroke-width", 1)
+                }
+            }
+
+            //data points
+            data.forEach((d,i) => {
+                svg2.append("circle")
+                    .attr("cx", xScale(d["x"]))
+                    .attr("cy", yScale(d["y"]))
+                    .attr("r", 10)
+                    .style("fill", "teal");
+            });
+            
+            </script>
+                
+
+        </p>
+
+    </body>
+</html>
