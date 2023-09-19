@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            .gridlines line {
+                stroke: #bbb;
+            }
+        
+            .gridlines .domain {
+                stroke: none;
+            }
+        </style>
+    </head>
+    <body> 
+        <h1>Kendall Hoffman (kah342)</h1>
+        <p>
+            <b>Problem 1</b>
+            <ol type="A">
+                <!-- Possible visual channels:
+                Aligned Position (horizontal or vertical); Unaligned Position (horizontal or vertical);
+                Aligned Length; Unaligned Length; Area; Volume; Color Hue; Color luminosity; -->
+                <li>
+                    <ul>
+                        <li>Marks: State and county outlines of varying colors</li>
+                        <li>Visual Channels: Varying color hue</li>
+                        </ul>
+                </li>
+                <br>
+                <li>
+                    <ul>
+                        <li>Marks: Blue, green, and red dots</li>
+                        <li>Visual Channels: Aligned horizontal and vertical position of the dots, color hue of dots
+                    </ul>
+                    
+                 
+            </ol>
+        </p>
+
+        <p>
+            <b>Problem 3</b>
+            <br>
+            <!-- part b -->
+            <div id="svg-area"></div>
+
+
+            <script>
+                // part a
+                d3.json('chip_dataset.json').then((data) => {
+                    console.log(data);
+                    data = data;  
+
+                    const svg = d3.select('#svg-area')
+                                    .append("svg")
+                                    .attr("width", 500)
+                                    .attr("height", 500);
+
+                    const width = svg.attr('width');
+                    const height = svg.attr('height');
+                    const margins = { top: 10, right: 10, bottom: 50, left: 50 }; 
+                    const chartWidth = width - margins.left - margins.right;
+                    const chartHeight = height - margins.top - margins.bottom;
+
+                    // g tag template from notes to translate/transform points 
+                    let chartArea = svg.append('g')
+                            .attr('transform', `translate(${margins.left},${margins.top})`);
+
+                    const releaseExtent = d3.extent(data, d => d['Release Day']);
+                    const transistorsExtent = d3.extent(data, d => d['Transistors(million)']);
+
+                    const xScale = d3.scaleLinear().domain(releaseExtent).range([0, chartWidth]);
+                // part e
+                    const yScale = d3.scaleLog().domain(transistorsExtent).range([chartHeight, 0]);
+
+                // part c
+                    let leftAxis = d3.axisLeft(yScale);
+                    svg.append('g')
+                        .attr('class', 'y axis')
+                        .attr('transform', `translate(${margins.left - 10},${margins.top})`)
+                        .call(leftAxis);
+
+                    let leftGridlines = d3.axisLeft(yScale)
+                        .tickSize(-chartWidth - 10)
+                        .tickFormat('');
+                    svg.append('g')
+                        .attr('class', 'gridlines')
+                        .attr('transform', `translate(${margins.left - 10},${margins.top})`)
+                        .lower()
+                        .call(leftGridlines);
+
+                    let bottomAxis = d3.axisBottom(xScale); 
+                    svg.append('g')
+                        .attr('class', 'y axis')
+                        .attr('transform', `translate(${margins.left},${chartHeight + margins.top + 10})`)
+                        .call(bottomAxis);
+
+                    let bottomGridlines = d3.axisBottom(xScale)
+                        .tickSize(-chartHeight - 10)
+                        .tickFormat('')
+                    svg.append('g')
+                        .attr('class', 'gridlines') 
+                        .attr('transform', `translate(${margins.left},${chartHeight + margins.top + 10})`)
+                        .lower()
+                        .call(bottomGridlines);
+
+                // part d
+                    data.forEach((d, i) => {
+
+                        chartArea.append('circle')
+                            .attr('cx', xScale(d['Release Day']))
+                            .attr('cy', yScale(d['Transistors(million)']))
+                            .attr('r', 3)
+                            .style('fill', 'darkblue')
+                            .attr('opacity', 0.3);
+                    });
+                    
+            });
+            </script>
+            
+        </p>
+    </body>
+</html>
