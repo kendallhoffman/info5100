@@ -11,7 +11,7 @@
             <li>Divergent: This is an effective scale given that it is balanced.
                 This is necessary so that the progression from the light color in the middle
                 to the darker colors on either side is the same in both directions. This ensures
-                the scale has a "midpoint", is sequential on either sside, and that it is saturated on 
+                the scale has a "midpoint", is sequential on either side, and that it is saturated on 
                 the ends and neutral in the middle.
             </li>
             <li>
@@ -21,20 +21,114 @@
                 applied to this dataset, it may not be as useful as a divergent scale.
             </li>
             <li>
-                TO BE COMPLETED
+                Deficiencies such as Tritano
             </li>
             <li>
                 I would recommend that they use a sequential scale of one single color to reate this choropleth map. 
                 This is due to the fact that it will be easier to compare life expectancies accross the map when colors 
-                are only lighter or darker than those around them for nearby areas. While this could also be done with this 
+                are only lighter or darker than those around. While this could also be done with this 
                 rainbow scale, the colors are less meaningful when they are on the map -- they are not easy to compare given
                 that their natural order is not as intuitive as a sequential scale would be in this scenario.
             </li>
         </ul>
 
         <h3>Problem 2</h3>
-        <p id="problem 2">
+        <p id="problem2">
+            <svg id="svg-p2" height="500" width="500" style="background: black"></svg>
+      
+        <script id="p2Script">
+            let svgP2 = d3.select('svg#svg-p2');
+
+            d3.csv('NCAA_shots.csv').then((data) => {
+                // console.log(data);
+                
+                data.forEach((d,i) => {
+                    d['attempt'] = parseInt(d['attempt'],10);
+                });
+
+
+                // const attemptExtent = d3.extent(data, d => d['attempt']);
+                const log_attemptExtent = d3.extent(data, d => d['log_attempt']);
+                // console.log(log_attemptExtent);
+                const attemptColors = d3.scaleSequential(d3.interpolateViridis).domain(log_attemptExtent);
+
+                data.forEach((d, i) => {
+                    svgP2.append('rect')
+                        .attr('x', d['x']*5)
+                        .attr('y', d['y']*5)
+                        .attr('width', 5)
+                        .attr('height', 5)
+                        .style('fill', attemptColors(d['log_attempt']));
+                });
+            });
+        </script>
+
+        <!-- In 2-3 sentences in your <p> tag, please
+                    describe one advantage and one disadvantage of the logarithmic color scale as compared to
+                    the original, linear scale. -->
+        <ul>
+            <li>
+                Advantage: The data is compressed so that a broad range of values can be represented 
+                as distinct without large or small values outweighing one another.
+            </li>
+            <li>
+                Disadvantage: There is a potential for misinterpretation for those unfamiliar with how a logarithmic scale works.
+                If someone is unaware of how this scale works, they may misinterpret the data and make incorrect conclusions.  
+            </li>
+        </ul>
+        
+        </p>
+
+        <h3>Problem 3</h3>        
+        <p id="problem3">
+            <svg id="svg-p3" height="420" width="420"></svg>
+            <div>
+                <input type="range" id="slider" name="slider"/>
+            </div>
+            <script>
+                let svgP3 = d3.select("svg#svg-p3");
+                // var lightness = 0;
+
+                var hslArray = [];
+            
+                for (i=0; i<21; i++){
+                    for (j=0; j<21; j++ ){
+                        var hVal = j * 18;
+                        var sVal = i * 5;
+
+                        var colors = {
+                            's': sVal,
+                            'h': hVal
+                        };
+
+                        hslArray.push(colors);
+                    }
+                }
+
+                console.log(hslArray);
+
+                let hScale = d3.scaleLinear().domain([0,360]).range([10,410]);
+                let sScale = d3.scaleLinear().domain([0,100]).range([410,10]);
+
+                function showCircles(lightness) {
+                    let circles = svgP3.selectAll("circle").data(hslArray)
+                                    .join("circle")
+                                    .attr("r", 10)
+                                    .attr("cx", d => hScale(d['h']))
+                                    .attr("cy", d => sScale(d['s']))
+                                    .style("fill", d => d3.hsl(d['h'],d['s']/100,lightness/100));
+                                }
+                showCircles(50);
+
+               let lightSlider = d3.select("input#slider")
+                                    .on("input", function(d){
+                                        newLightness = this.value
+                                        showCircles(newLightness)
+                                    });              
+
+            </script>
             
         </p>
+   
     </body>
 </html>
