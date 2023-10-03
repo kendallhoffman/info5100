@@ -1,0 +1,201 @@
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            .gridlines line {
+                stroke: #bbb;
+            }
+        
+            .gridlines .domain {
+                stroke: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <p><b>Kendall Hoffman (kah342)</b></p>
+            <!-- - Is there a relationship between the price of wines and their 0-100 scores on a quality point scale?
+            - Are some wine regions better or more expensive than others? -->
+        <p id="a">
+            <svg width="800" height="500" id="wines">
+            </svg>
+            <br>
+            <b> </b>
+            I began by cleaning the "price" for each element in the file so that all prices were represented as integers
+            and did not include any dollar signs or commas. This was to ensure all of the numbers were the same type and did
+            not contain unnecessary characters. I also included d3.autotype when I loaded the data into the file.
+        </p>
+        <br>
+        <p id="b">
+
+        </p>
+            <script>
+        //part a
+                let svg = d3.select('svg#wines');
+                    const width = svg.attr('width');
+                    const height = svg.attr('height');
+                    const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+                    const chartWidth = width - margins.left - margins.right;
+                    const chartHeight = height - margins.top - margins.bottom;
+            
+                d3.json('wines.json', d3.autoType).then((data) => {
+
+                    data.forEach((d, i) => {
+                        d['price'] = d['price'].replace("$",'');
+                        d['price'] = d['price'].replace(",", '');
+                    });
+
+                    console.log(data);
+
+        //part b       
+                //extents
+                const priceExtent = d3.extent(data, d => d['price']);
+                const pointsExtent = d3.extent(data, d => d['points']);
+                    
+                 //scales
+                    //x-axis scale
+                    let priceScale = d3.scaleLinear().domain([0,240]).range([0, chartWidth]);
+                    //y axis scale
+                    let pointScale = d3.scaleSymlog().domain([80,100]).range([chartHeight, 0]);
+            
+                //left axis/gridlines
+                    let leftAxis = d3.axisLeft(pointScale);
+                    svg.append('g')
+                        .attr('class', 'y axis')
+                        .attr('transform', `translate(${margins.left - 10},${margins.top})`)
+                        .call(leftAxis);
+
+                    let leftGridlines = d3.axisLeft(pointScale)
+                        .tickSize(-chartWidth - 10)
+                        .tickFormat('');
+
+                    svg.append('g')
+                        .attr('class', 'gridlines')
+                        .attr('transform', `translate(${margins.left - 10},${margins.top})`)
+                        .call(leftGridlines);
+
+                //bottom axis/gridlines
+                    let bottomAxis = d3.axisBottom(priceScale);
+                    svg.append('g')
+                        .attr('class', 'x axis')
+                        .attr('transform', `translate(${margins.left},${chartHeight + margins.top + 10})`)
+                        .call(bottomAxis);
+
+                    let bottomGridlines = d3.axisBottom(priceScale)
+                        .tickSize(-chartHeight - 10)
+                        .tickFormat('');
+
+                    svg.append('g')
+                        .attr('class', 'gridlines')
+                        .attr('transform', `translate(${margins.left},${chartHeight + margins.top + 10})`)
+                        // .lower()
+                        .call(bottomGridlines);
+
+                    
+        //part c
+                let chartArea = svg.append('g')
+                        .attr('transform', `translate(${margins.left},${margins.top})`);
+
+                //jitter function to add random value between -4 and 4 to dot's each x and y value
+                function jitter(ogVal) {
+                     newVal = ogVal + (Math.random() * 8 - 4);
+                     return newVal;
+                }
+
+                //create label
+               const label = chartArea.append('text')
+                        .attr('id', 'label')
+                        .attr("visibility", "hidden");
+
+                //iterate through each data point and plot dot on the graph
+                data.forEach((d, i) => {
+                    let dotColor;
+                    let jitteredX = jitter(priceScale(d['price']));
+                    let jitteredY = jitter(pointScale(d['points']));
+                    let labelXCoord;
+                    let labelYCoord;
+                    let anchor;
+
+                    if (d['country'] == 'Fakerton'){
+                        dotColor ="black"
+                    }
+                    else{
+                        if (d['state'] == "New York") {
+                            dotColor = "steelblue"
+                        }
+                        else if (d['state'] == "Oregon") {
+                            dotColor = "gold"
+                        }
+                        else if (d['state'] == "California") {
+                            dotColor = "purple"
+                        }
+                        else if (d['state'] == "Washington") {
+                            dotColor = "green"
+                        }
+                        else {
+                            dotColor = "black"
+                        }
+                    }
+
+                    
+                    if (d['price'] <= 60.0){
+                        labelXCoord = priceScale(d['price']) + 15.0
+                        labelYCoord = pointScale(d['points']) - 20.0
+                        anchor = 'start'
+                    }
+                    else if (d['price'] > 60.0 && d['price'] <= 200.0 ) {
+                        labelXCoord = priceScale(d['price']) + 15.0
+                        labelYCoord = pointScale(d['points']) + 30.0
+                        anchor = 'middle'
+                    }
+                    else if (d['price'] > 200.0) {
+                        labelXCoord = priceScale(d['price']) + 15.0
+                        labelYCoord = pointScale(d['points']) - 20.0
+                        anchor = 'end'
+                    }
+                        
+                
+                    let circle = chartArea.append('circle')
+                        .attr('cx', jitteredX)
+                        .attr('cy', jitteredY)
+                        .attr('r', 5)
+                        .attr('fill', dotColor)
+                        .attr('opacity', 0.25)
+        // part d
+                        .on("mouseover", function () {
+                            d3.select(this)
+                                .attr('r', 7)
+                                .attr('opacity', '1')
+                                .raise()
+                                
+                            label.attr("visibility", "")
+                                .attr('x', labelXCoord)
+                                .attr('y', labelYCoord)
+                                .attr('text-anchor', anchor)
+                                .text(d['title'])
+                                .attr('background-color', 'white')
+                                .raise();
+                        })
+                        .on("mouseout", function (){
+                            d3.select(this)
+                                .transition()
+                                .attr('cx', jitteredX)
+                                .attr('cy', jitteredY)
+                                .attr('r', 5)
+                                .attr('fill', dotColor)
+                                .attr('opacity', 0.25)
+                                .attr('stroke', 'none');
+                            label.attr("visibility", "hidden");
+                        });
+
+                        //rhide values where state is unknown
+                        if (dotColor == "black"){
+                            circle.attr("visibility", "hidden")
+                        };
+                    });
+                });   
+                
+        </script>
+    </body>
+              
+</html>
