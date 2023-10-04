@@ -21,20 +21,58 @@
             </svg>
             <br>
             <b> </b>
-            I began by cleaning the "price" for each element in the file so that all prices were represented as integers
+            I began by cleaning the "price" for each element in the file so that all prices were represented as numbers
             and did not include any dollar signs or commas. This was to ensure all of the numbers were the same type and did
-            not contain unnecessary characters. I also included d3.autotype when I loaded the data into the file.
+            not contain unnecessary characters. I also included d3.autotype when I loaded the data into the file. I also noticed
+            there were some wines that had points values greater than 100 (which was not valid), as well as countries that were 
+            invalid ("Fakerton"). These wines were filtered out of the data set. Altogether I filtered out 64 values. 
         </p>
-        <br>
+
         <p id="b">
+            I utilized margins (top: 10, right: 50, bottom: 60, left: 60) so that my visualization was well aligned to the 
+            desktop view, and the other elements on the page (the written rationale on the bottom and my name at the top). 
+            I utilized extents to create an appropriate domains by determining the minimum and maximum point and price values
+            in the data set. This then allowed me to apply these extents to their respective axes and constrain the visualization
+            to only contain relevant ranges for each. At first, I utilized a linear scale for each axis but this skewed that data 
+            points within the graph and made them difficult to view. In order to make individual data points more distinguishable, I settled 
+            on creating a linear scale for the y axis given that values were not very spread out and were instead concentrated,
+            around a few values (80-100) and log scale for the x given that the values were concentrated from 0 to 100 but the set ultimately
+            contained a very wide range of values (0-200+). When determining the colors to use for my visualization, I referenced the 
+            viridis pallette and selected similar colors to those found within it (green, blue, purple, and yellow). This was to ensure 
+            individuals with colorblindness would still be able to utilize this visualization and could make note of the differences between 
+            each state based on the color of any given data point. 
+        </p>
+
+        <p id="c">
+            In creating circle elements, I decided to give them all a radius of 5 to avoid visual crowding too much in areas of the 
+            visualization where there were many circles. I also utilized an opacity of 0.3 for each cirlce to ensure that it can still 
+            be seen with the white background, and so that the density of points in various regions of the visualzation were also apparent. 
+
+            I plotted each point by using the jitter() function I created which finds a random number between -4 and 4 and adds it to the 
+            original x or y values. One main advantage of doing this is that it allows a viewer to hover their cursor over each individual dot more
+            given that the datapoints become slightly separated, and their individual and unique titles can be identified. One main downside of doing
+            this, however, is that the data points do not fall exactly on the location that correspond to the intersection of their respective price 
+            and point value. This may give viewers a skewed idea of where points may lie relative to others nearby, especially given that a new random 
+            "jittered" value is chosen every time the page is loaded. 
+        </p>
+
+        <p id="d">
+            Implementing the interaction, I enlarged the size of the dot that is being hovered over it, and the corresponding title also appears near the point.
+            Changing the circles in some way may be beneficial to users from this approach given that it helps to show users exactly which points they are hovering 
+            over in places where there are many points near one another. Limiting the interaction to growing a circle in size and displaying the label may, however, 
+            lead to confusion in a crowded area of the circles are VERY densely packed. In order to improve the user experience during the interaction, I set the opacity 
+            of the circles to 1 so that they can more easily be seen, and raised them to the top of the "pile" of circles nearby so they can easily be discenerd. Furthermore,
+            I changed the text-anchor of the label depending on where the circle was located on the graph so that it does not get cut off. I also added .transiion() to 
+            help smooth the mouse movement throughout the itneraction too to further improve the user experience. 
 
         </p>
+
             <script>
         //part a
                 let svg = d3.select('svg#wines');
                     const width = svg.attr('width');
                     const height = svg.attr('height');
-                    const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+                    const margins = { top: 10, right: 50, bottom: 60, left: 60 };
                     const chartWidth = width - margins.left - margins.right;
                     const chartHeight = height - margins.top - margins.bottom;
             
@@ -146,17 +184,17 @@
                         dotColor = "green"
                     }
 
-                    if(d['price'] <= 60.0){
+                    if(d['price'] < 30.0){
                         labelXCoord = priceScale(d['price']) + 15.0
                         labelYCoord = pointScale(d['points']) - 20.0
                         anchor = 'start'
                     }
-                    else if (d['price'] > 60.0 && d['price'] <= 200.0 ) {
+                    else if (d['price'] >=  30.0 && d['price'] <= 80.0 ) {
                         labelXCoord = priceScale(d['price']) + 15.0
                         labelYCoord = pointScale(d['points']) + 30.0
                         anchor = 'middle'
                     }
-                    else if (d['price'] > 200.0) {
+                    else if (d['price'] > 80.0) {
                         labelXCoord = priceScale(d['price']) + 15.0
                         labelYCoord = pointScale(d['points']) - 20.0
                         anchor = 'end'
@@ -168,11 +206,11 @@
                         .attr('cy', jitteredY)
                         .attr('r', 5)
                         .attr('fill', dotColor)
-                        .attr('opacity', 0.25)
+                        .attr('opacity', 0.3)
         // part d
                         .on("mouseover", function () {
                             d3.select(this)
-                                .attr('r', 7)
+                                .attr('r', 8)
                                 .attr('opacity', '1')
                                 .raise()
                                 
