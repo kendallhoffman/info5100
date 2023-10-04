@@ -43,20 +43,38 @@
                     data.forEach((d, i) => {
                         d['price'] = d['price'].replace("$",'');
                         d['price'] = d['price'].replace(",", '');
+                        d['points'] = parseInt(d['points'],10);
+                        d['price'] = parseInt(d['price'], 10);
                     });
 
                     console.log(data);
 
+                    let fakes = 0;
+                    data = data.filter((d) => {
+                        if(d.points >= 0 && d.points <= 100 && d.country!="Fakerton") {
+                            return true;
+                        }
+                        else {
+                            fakes++;
+                        }
+                    });
+
+                    console.log(data);
+                    console.log(fakes);
+
         //part b       
                 //extents
                 const priceExtent = d3.extent(data, d => d['price']);
+               
+                console.log(typeof(data.map(d => d['price'])[0]));
+
                 const pointsExtent = d3.extent(data, d => d['points']);
                     
                  //scales
                     //x-axis scale
-                    let priceScale = d3.scaleLinear().domain([0,240]).range([0, chartWidth]);
+                    let priceScale = d3.scaleLog().domain(priceExtent).range([0, chartWidth]);
                     //y axis scale
-                    let pointScale = d3.scaleSymlog().domain([80,100]).range([chartHeight, 0]);
+                    let pointScale = d3.scaleLinear().domain(pointsExtent).range([chartHeight, 0]);
             
                 //left axis/gridlines
                     let leftAxis = d3.axisLeft(pointScale);
@@ -115,30 +133,20 @@
                     let labelXCoord;
                     let labelYCoord;
                     let anchor;
-
-                    if (d['country'] == 'Fakerton'){
-                        dotColor ="black"
+                    if (d['state'] == "New York") {
+                        dotColor = "steelblue"
                     }
-                    else{
-                        if (d['state'] == "New York") {
-                            dotColor = "steelblue"
-                        }
-                        else if (d['state'] == "Oregon") {
-                            dotColor = "gold"
-                        }
-                        else if (d['state'] == "California") {
-                            dotColor = "purple"
-                        }
-                        else if (d['state'] == "Washington") {
-                            dotColor = "green"
-                        }
-                        else {
-                            dotColor = "black"
-                        }
+                    else if (d['state'] == "Oregon") {
+                        dotColor = "gold"
+                    }
+                    else if (d['state'] == "California") {
+                        dotColor = "purple"
+                    }
+                    else if (d['state'] == "Washington") {
+                        dotColor = "green"
                     }
 
-                    
-                    if (d['price'] <= 60.0){
+                    if(d['price'] <= 60.0){
                         labelXCoord = priceScale(d['price']) + 15.0
                         labelYCoord = pointScale(d['points']) - 20.0
                         anchor = 'start'
@@ -187,11 +195,6 @@
                                 .attr('stroke', 'none');
                             label.attr("visibility", "hidden");
                         });
-
-                        //rhide values where state is unknown
-                        if (dotColor == "black"){
-                            circle.attr("visibility", "hidden")
-                        };
                     });
                 });   
                 
