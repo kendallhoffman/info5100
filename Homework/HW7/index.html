@@ -9,6 +9,8 @@
     <svg id="chloropleth" height="770" width="990" style="margin:20px">
     </svg>
 
+    <ul id="quantiles"></ul>
+
     <script id="problem 1"> 
 
     const svg = d3.select("#chloropleth");
@@ -37,7 +39,7 @@
                             .domain(medianIncomes)
                             .range(colors);
 
-        console.log(colorScale.quantiles());
+        
 
         //creating g tag in SVG element
         let mapArea = svg.append('g');
@@ -78,7 +80,19 @@
             .attr("r", 5)
             .attr("fill", "black");
 
-    }
+        
+        
+        const quantileList = d3.select("#quantiles");
+        const getQuantiles = colorScale.quantiles();
+
+        const f = d3.format("0.2f");
+        getQuantiles.forEach(function(d){
+            quantileList.append('li')
+                        .text("$" + f(d));
+            }
+        );
+    
+    };
     requestData();
 
     </script>
