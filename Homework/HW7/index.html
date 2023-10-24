@@ -1,0 +1,88 @@
+<html> 
+<head> 
+    <script src="https://d3js.org/d3.v7.min.js"></script> 
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+</head>
+<body>
+    <p><b>Kendall Hoffman (kah342)</b></p>
+
+    <svg id="chloropleth" height="770" width="990" style="margin:20px">
+    </svg>
+
+    <script id="problem 1"> 
+
+    const svg = d3.select("#chloropleth");
+    const width = svg.attr("width");
+    const height = svg.attr("height")
+    const margins = 20;
+
+    const requestData = async function () {
+        const nyincome = await d3.json("ny_income.topo.json");
+        console.log(nyincome);
+
+        const zips = topojson.feature(nyincome, nyincome.objects.zip_codes);
+        const zipsMesh = topojson.mesh(nyincome, nyincome.objects.zip_codes);
+        const stateMesh = topojson.mesh(nyincome, nyincome.objects.state);
+        
+        const projection = d3.geoMercator().fitSize([width, height], zips);
+        const path = d3.geoPath().projection(projection);
+
+        // color scale from lightest to darkest, I got my scale from this site: https://colorbrewer2.org/#type=sequential&scheme=YlGn&n=5
+        const colors = ["#ffffcc", "#c2e699", "#78c679", "#31a354", "#006837"];
+
+        var medianIncomes = d3.map(nyincome.objects.zip_codes.geometries, d => d.properties.median_income);
+        console.log(medianIncomes);
+
+        var colorScale = d3.scaleQuantile()
+                            .domain(medianIncomes)
+                            .range(colors);
+
+        console.log(colorScale.quantiles());
+
+        //creating g tag in SVG element
+        let mapArea = svg.append('g');
+
+        //data join
+        let zipPaths = mapArea.selectAll("path").data(zips.features)
+            .join("path")
+            .attr("class", "zip")
+            // .attr("note", d => d.id) //debugging apparently
+            .attr("d", path)
+            .attr("fill", d => colorScale(d.properties.median_income));
+        //mouse over event here? 
+        
+        mapArea.append("path").datum(zipsMesh)
+                .attr("class", "outline")
+                .attr("d", path)
+                .attr("stroke", "white")
+                .style('stroke-width', '1')
+                .attr("fill", "none");
+
+         mapArea.append("path").datum(stateMesh)
+                .attr("class", "outline")
+                .attr("d", path)
+                .attr("stroke", "darkgrey")
+                .style('stroke-width', '3')
+                .attr("fill", "none");
+
+        const towerCoordinates = [-76.4850, 42.4476]
+
+        var placement = d3.geoMercator()
+                            .center(towerCoordinates)
+                            .scale(1000)
+                            .translate([width / 2, height / 2]);
+
+        svg.append("circle")
+            .attr("cy", projection(towerCoordinates)[1])
+            .attr("cx", projection(towerCoordinates)[0])
+            .attr("r", 5)
+            .attr("fill", "black");
+
+    }
+    requestData();
+
+    </script>
+
+
+</body>
+</html>
