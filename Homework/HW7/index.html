@@ -32,6 +32,7 @@
         // color scale from lightest to darkest, I got my scale from this site: https://colorbrewer2.org/#type=sequential&scheme=YlGn&n=5
         const colors = ["#ffffcc", "#c2e699", "#78c679", "#31a354", "#006837"];
 
+        //extracting just median incomes to get domain
         var medianIncomes = d3.map(nyincome.objects.zip_codes.geometries, d => d.properties.median_income);
         console.log(medianIncomes);
 
@@ -48,18 +49,17 @@
         let zipPaths = mapArea.selectAll("path").data(zips.features)
             .join("path")
             .attr("class", "zip")
-            // .attr("note", d => d.id) //debugging apparently
             .attr("d", path)
             .attr("fill", d => colorScale(d.properties.median_income));
-        //mouse over event here? 
         
+        //zip codes outlines
         mapArea.append("path").datum(zipsMesh)
                 .attr("class", "outline")
                 .attr("d", path)
                 .attr("stroke", "white")
                 .style('stroke-width', '1')
                 .attr("fill", "none");
-
+        //state outline
          mapArea.append("path").datum(stateMesh)
                 .attr("class", "outline")
                 .attr("d", path)
@@ -67,6 +67,7 @@
                 .style('stroke-width', '3')
                 .attr("fill", "none");
 
+        //bell tower point 
         const towerCoordinates = [-76.4850, 42.4476]
 
         var placement = d3.geoMercator()
@@ -81,7 +82,7 @@
             .attr("fill", "black");
 
         
-        
+        //quantile list 
         const quantileList = d3.select("#quantiles");
         const getQuantiles = colorScale.quantiles();
 
