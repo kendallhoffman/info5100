@@ -1,0 +1,110 @@
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            .gridlines line {
+                stroke: #bbb;
+            }
+        
+            .gridlines .domain {
+                stroke: none;
+            }
+        </style>
+    </head>
+    <body>
+        <p><b>Kendall Hoffman kah342</b></p>
+
+        <p id="hw9">
+
+        </p>
+
+        <svg height="700" width="600" id="lollipop">
+            <defs>
+                <marker id="start" markerWidth="1" markerHeight="6" refX="-2" refY="3" orient="auto">
+                    <path d="M 0 0 V 6 H 1 V 0 Z" />
+                </marker>
+                <marker id="end" markerWidth="6" markerHeight="4" refX="7" refY="2" orient="auto">
+                    <path d="M 0 0 V 4 L 6 2 Z" />
+                </marker>
+            </defs>
+        </svg>
+
+        <script id = "hw9-script">
+            const svg = d3.select("#lollipop");
+            const width = svg.attr("width");
+            const height = svg.attr("height");
+            
+            let margin = { "top": 10, "right": 10, "bottom": 45, "left": 45 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            const requestData = async function () {
+                const artists = await d3.json("artists.json");
+                console.log(artists);
+
+                let percentScale = d3.scaleLinear().domain([100,0]).range([0,chartHeight]);
+                let xScalePoint = d3.scalePoint()
+                                .domain(d3.map(artists, d => d.category))
+                                .range([0, chartWidth]);
+
+                let leftAxis = d3.axisLeft(percentScale);
+                svg.append('g')
+                    .attr('class', 'y axis')
+                    .attr('transform', `translate(${margin.left - 10},${margin.top})`)
+                    .call(leftAxis);
+                
+                let leftGridlines = d3.axisLeft(percentScale)
+                    .tickSize(-chartWidth - 10)
+                    .tickFormat('');
+
+                svg.append('g')
+                    .attr('class', 'gridlines')
+                    .attr('transform', `translate(${margin.left - 10},${margin.top})`)
+                    .call(leftGridlines);
+
+                let bottomAxis = d3.axisBottom(xScalePoint);
+                svg.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', `translate(${margin.left},${chartHeight + margin.top+10})`)
+                    .call(bottomAxis);
+
+                let bottomGridlines = d3.axisBottom(xScalePoint)
+                    .tickSize(-chartHeight-10)
+                    .tickFormat('');
+
+                svg.append('g')
+                    .attr('class', 'gridlines')
+                    .attr('transform', `translate(${margin.left},${chartHeight + margin.top+10})`)
+                    .call(bottomGridlines);
+
+                svg.append('g')
+                    .attr('class', 'chart')
+                    .attr('transform', `translate(${margin.left},${margin.bottom})`)
+
+                
+                let lollipops = svg.selectAll("g.lollipop").data(artists)
+                        .join(
+                            enter => enter.append("g")
+                                            .attr("class", "lollipop")     
+                        );
+
+                lollipops.each(function (d) {
+                    console.log(this, d);
+                    var i = d3.select(this)
+                    i.append("circle")
+                        .attr("r", 8)
+                        .attr("cx", xScalePoint(d.category))
+                        .attr("cy", percentScale(d[1970]))
+                        .attr("fill", "darkred")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", 1);
+                });
+
+                console.log(lollipops);
+            };
+
+            requestData();
+
+        </script>
+    </body>
+</html>
