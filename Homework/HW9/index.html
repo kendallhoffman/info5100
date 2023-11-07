@@ -42,12 +42,13 @@
                 const artists = await d3.json("artists.json");
                 console.log(artists);
 
-                let percentScale = d3.scaleLinear().domain([100,0]).range([0,chartHeight]);
+                let percentScale = d3.scaleLinear().domain([1,0]).range([0,chartHeight]);
                 let xScalePoint = d3.scalePoint()
                                 .domain(d3.map(artists, d => d.category))
-                                .range([0, chartWidth]);
+                                .range([0, chartWidth])
+                                .padding(0.2);
 
-                let leftAxis = d3.axisLeft(percentScale);
+                let leftAxis = d3.axisLeft(percentScale).tickFormat(d3.format(".0%"));
                 svg.append('g')
                     .attr('class', 'y axis')
                     .attr('transform', `translate(${margin.left - 10},${margin.top})`)
@@ -79,26 +80,128 @@
 
                 svg.append('g')
                     .attr('class', 'chart')
-                    .attr('transform', `translate(${margin.left},${margin.bottom})`)
+                    .attr('transform', `translate(${margin.left},${margin.top})`)
 
                 
-                let lollipops = svg.selectAll("g.lollipop").data(artists)
+                let lollipops = svg.select("g.chart").selectAll("g.lollipop").data(artists)
                         .join(
                             enter => enter.append("g")
                                             .attr("class", "lollipop")     
-                        );
+                        )
+                        .each(function (d) {
+                            console.log(this, d);
+                            var i = d3.select(this);
+                            i.append("line")
+                                .attr("x1", xScalePoint(d.category))
+                                .attr("y1", percentScale(d[1970]))
+                                .attr("x2", xScalePoint(d.category))
+                                .attr("y2", percentScale(d[2020]))
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 4);
+                            if (Math.abs(percentScale(d[2020]) - percentScale(d[1970])) > 30) {
+                                i.select("line")
+                                    .attr("marker-start", "url(#start)")
+                                    .attr("marker-end", "url(#end)");
+                            }
+                            i.append("circle")
+                                .attr("r", 8)
+                                .attr("cx", xScalePoint(d.category))
+                                .attr("cy", percentScale(d[1970]))
+                                .attr("fill", "firebrick")
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 1);
+                            i.append("circle")
+                                .attr("r", 8)
+                                .attr("cx", xScalePoint(d.category))
+                                .attr("cy", percentScale(d[2020]))
+                                .attr("fill", "steelblue")
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 1);
+                            
+                            const format = d3.format(".0%");
 
-                lollipops.each(function (d) {
-                    console.log(this, d);
-                    var i = d3.select(this)
-                    i.append("circle")
-                        .attr("r", 8)
-                        .attr("cx", xScalePoint(d.category))
-                        .attr("cy", percentScale(d[1970]))
-                        .attr("fill", "darkred")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", 1);
+                            //label 1970
+                            i.append("text")
+                                .attr("x", function() {
+                                    if (xScalePoint(d.category) < 300){
+                                        return xScalePoint(d.category) + 15.0
+                                    }
+                                    else {
+                                        return xScalePoint(d.category) - 35.0
+                                    }
+                                        
+                                })
+                                .attr("y", function() { 
+                                    //if close together 
+                                    if (Math.abs(percentScale(d[2020]) - percentScale(d[1970])) < 30) {
+                                        //if 2020 is lower than 1970 
+                                        if (percentScale(d[2020]) > percentScale(d[1970])) {
+                                            //move 1970 label up
+                                            return percentScale(d[2020]) + 10
+                                        }
+                                        else{
+                                            //if 2020 is higher than 1970
+                                            return percentScale(d[1970])
+                                        }
+                                    }
+                                     //if far apart
+                                    else {
+                                        return percentScale(d[1970])
+                                    }
+                                })  
+                                .attr("class", "label1970")
+                                .text(format(d[1970]));
+                               
+
+                            //label 2020
+                            i.append("text")
+                                .attr("x", function () {
+                                    if (xScalePoint(d.category) < 300) {
+                                        return xScalePoint(d.category) + 15.0
+                                    }
+                                    else {
+                                        return xScalePoint(d.category) - 35.0
+                                    }
+
+                                })
+                                .attr("y", function () {
+                                    //if close together 
+                                    if (Math.abs(percentScale(d[2020]) - percentScale(d[1970])) < 30) {
+                                        //if 2020 is lower than 1970 
+                                        if (percentScale(d[2020]) > percentScale(d[1970])) {
+                                            //move 2020 label down
+                                            return percentScale(d[2020]) - 10
+                                        }
+                                        else {
+                                            //if 2020 is higher than 1970
+                                            return percentScale(d[2020]) - 10
+                                        }
+                                    }
+                                    //if far apart
+                                    else {
+                                        return percentScale(d[2020])
+                                    }
+                                })  
+                                .attr("class", "label2020")
+                                .text(format(d[2020]));
+                        
+                            i.selectAll(".label1970, .label2020").style("visibility", "hidden");
                 });
+                
+
+
+                lollipops.on("mouseover", function () {
+                    d3.select(this).selectAll("circle")
+                        .attr("stroke-width", 3);
+                    d3.select(this).selectAll(".label1970, .label2020")
+                        .style("visibility", "")
+                    })
+                .on("mouseout", function() {
+                    d3.select(this).selectAll("circle")
+                        .attr("stroke-width", 1);
+                    d3.select(this).selectAll(".label1970, .label2020")
+                        .style("visibility", "hidden")
+                })
 
                 console.log(lollipops);
             };
