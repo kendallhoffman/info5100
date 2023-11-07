@@ -137,7 +137,7 @@
                                         //if 2020 is lower than 1970 
                                         if (percentScale(d[2020]) > percentScale(d[1970])) {
                                             //move 1970 label up
-                                            return percentScale(d[2020]) + 10
+                                            return percentScale(d[2020]) - 10
                                         }
                                         else{
                                             //if 2020 is higher than 1970
@@ -170,7 +170,7 @@
                                         //if 2020 is lower than 1970 
                                         if (percentScale(d[2020]) > percentScale(d[1970])) {
                                             //move 2020 label down
-                                            return percentScale(d[2020]) - 10
+                                            return percentScale(d[2020]) + 10
                                         }
                                         else {
                                             //if 2020 is higher than 1970
